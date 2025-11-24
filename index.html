@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>已完成任务列表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background: #95a5a6;
+        }
+        
+        button.secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .tasks-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .task-item {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+            text-align: center;
+            flex-grow: 1;
+            max-width: 200px;
+        }
+        
+        .task-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task-item.completed {
+            background: #ecf0f1;
+            color: #7f8c8d;
+            text-decoration: line-through;
+        }
+        
+        .task-item.completed:hover {
+            background: #d5dbdb;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-width: 150px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .instructions {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .instructions p {
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .task-item {
+                min-width: 120px;
+                padding: 12px 15px;
+                font-size: 0.95rem;
+            }
+            
+            .stats {
+                gap: 15px;
+            }
+            
+            .stat-card {
+                min-width: 120px;
+                padding: 15px 20px;
+            }
+            
+            .stat-value {
+                font-size: 1.7rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 80%;
+            }
+            
+            .task-item {
+                min-width: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>已完成任务列表</h1>
+            <p class="subtitle">点击任务标记为已完成，每个用户的完成状态独立保存，无需登录</p>
+        </header>
+        
+        <div class="controls">
+            <button id="toggle-completed">显示/隐藏已完成</button>
+            <button id="reset-all" class="secondary">重置我的进度</button>
+        </div>
+        
+        <div class="tasks-container" id="tasks-container">
+            <!-- 任务项将通过JavaScript动态添加 -->
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-count">0</div>
+                <div class="stat-label">总任务数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completed-count">0</div>
+                <div class="stat-label">已完成</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="progress-percent">0%</div>
+                <div class="stat-label">完成进度</div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <p>1. 点击任务项可以标记为已完成/未完成</p>
+            <p>2. 您的完成状态会自动保存在浏览器中，无需登录</p>
+            <p>3. 使用"显示/隐藏已完成"按钮可以过滤显示内容</p>
+            <p>4. 使用"重置我的进度"可以清除所有完成状态</p>
+        </div>
+        
+        <footer>
+            <p>您的数据仅保存在当前设备浏览器中</p>
+        </footer>
+    </div>
+
+    <script>
+        // 示例任务列表
+        const tasks = [
+    "独立完成一份科学实验报告",
+    "阅读完5本经典儿童文学作品",
+    "掌握小数和分数的四则运算",
+    "学会游泳或一项新运动技能",
+    "参加一次校级以上比赛或表演",
+    "制作一个个人成长记录册",
+    "学会使用电脑完成作业和查阅资料",
+    "培养每天阅读30分钟的习惯",
+    "学会管理自己的零花钱",
+    "独立完成一次主题演讲",
+    "交到3个新朋友",
+    "学会解决与同学矛盾的方法",
+    "掌握基本的英语日常对话",
+    "了解并实践环保知识",
+    "学会制定学习计划并执行",
+    "培养一个艺术爱好（绘画/音乐/舞蹈等）",
+    "了解家庭开支并参与理财讨论",
+    "学会基本的急救知识",
+    "完成一个长期的研究性学习项目",
+    "培养团队合作能力",
+    "学会时间管理技巧",
+    "掌握基本的电脑操作技能",
+    "了解中国传统文化和节日",
+    "培养坚持锻炼的习惯",
+    "学会感恩和表达感谢"
+];
+
+        // 用户标识和状态管理
+        let userId = null;
+        let userCompletedTasks = {};
+        let showCompleted = true;
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取或生成用户ID
+            initializeUser();
+            
+            // 加载用户完成状态
+            loadUserProgress();
+            
+            // 渲染任务列表
+            renderTasks();
+            
+            // 更新统计信息
+            updateStats();
+            
+            // 绑定事件
+            document.getElementById('toggle-completed').addEventListener('click', toggleCompleted);
+            document.getElementById('reset-all').addEventListener('click', resetProgress);
+        });
+
+        // 初始化用户标识
+        function initializeUser() {
+            // 尝试从本地存储获取用户ID
+            userId = localStorage.getItem('taskListUserId');
+            
+            if (!userId) {
+                // 如果没有用户ID，生成一个简单的标识
+                userId = 'user_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('taskListUserId', userId);
+            }
+        }
+
+        // 加载用户进度
+        function loadUserProgress() {
+            const savedProgress = localStorage.getItem(`taskListProgress_${userId}`);
+            if (savedProgress) {
+                userCompletedTasks = JSON.parse(savedProgress);
+            } else {
+                // 初始化所有任务为未完成
+                tasks.forEach(task => {
+                    userCompletedTasks[task] = false;
+                });
+                saveUserProgress();
+            }
+        }
+
+        // 保存用户进度
+        function saveUserProgress() {
+            localStorage.setItem(`taskListProgress_${userId}`, JSON.stringify(userCompletedTasks));
+        }
+
+        // 渲染任务列表
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = '';
+            
+            tasks.forEach(task => {
+                if (!showCompleted && userCompletedTasks[task]) {
+                    return; // 如果隐藏已完成任务，则跳过
+                }
+                
+                const taskElement = document.createElement('div');
+                taskElement.className = `task-item ${userCompletedTasks[task] ? 'completed' : ''}`;
+                taskElement.textContent = task;
+                
+                taskElement.addEventListener('click', function() {
+                    toggleTaskCompletion(task);
+                });
+                
+                container.appendChild(taskElement);
+            });
+            
+            // 更新统计信息
+            updateStats();
+        }
+
+        // 切换任务完成状态
+        function toggleTaskCompletion(task) {
+            userCompletedTasks[task] = !userCompletedTasks[task];
+            saveUserProgress();
+            renderTasks();
+        }
+
+        // 切换显示/隐藏已完成任务
+        function toggleCompleted() {
+            showCompleted = !showCompleted;
+            renderTasks();
+            
+            // 更新按钮文本
+            const button = document.getElementById('toggle-completed');
+            button.textContent = showCompleted ? '隐藏已完成' : '显示已完成';
+        }
+
+        // 重置用户进度
+        function resetProgress() {
+            if (confirm('确定要重置您的所有进度吗？此操作不可撤销。')) {
+                tasks.forEach(task => {
+                    userCompletedTasks[task] = false;
+                });
+                saveUserProgress();
+                renderTasks();
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const totalCount = tasks.length;
+            const completedCount = Object.values(userCompletedTasks).filter(status => status).length;
+            const progressPercent = Math.round((completedCount / totalCount) * 100);
+            
+            document.getElementById('total-count').textContent = totalCount;
+            document.getElementById('completed-count').textContent = completedCount;
+            document.getElementById('progress-percent').textContent = `${progressPercent}%`;
+        }
+    </script>
+</body>
+</html>
