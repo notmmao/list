@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二进制可视化工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a3a, #0d1b2a);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(16, 30, 46, 0.7);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #4cc9f0, #4361ee);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #a0a0a0;
+            margin-bottom: 15px;
+        }
+
+        .input-section {
+            background: rgba(16, 30, 46, 0.7);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 2px #4361ee;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: linear-gradient(90deg, #4361ee, #3a0ca3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .examples {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+        }
+
+        .examples span {
+            display: inline-block;
+            margin: 0 5px;
+            padding: 3px 8px;
+            background: rgba(67, 97, 238, 0.2);
+            border-radius: 4px;
+        }
+
+        .result-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .bit-display {
+            background: rgba(16, 30, 46, 0.7);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .bit-display h2 {
+            margin-bottom: 20px;
+            color: #4cc9f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bit-display h2::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .bits-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .bit-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .bits-row {
+            display: flex;
+            gap: 5px;
+        }
+
+        .bit {
+            width: 30px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .bit.editable:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .bit-0 {
+            background: rgba(183, 28, 28, 0.7);
+            color: #ff8a80;
+        }
+
+        .bit-1 {
+            background: rgba(0, 230, 118, 0.7);
+            color: #e0f7fa;
+        }
+
+        .hex {
+            width: 30px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #4cc9f0;
+            font-size: 1.1rem;
+        }
+
+        .output-section {
+            background: rgba(16, 30, 46, 0.7);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .output-section h3 {
+            margin-bottom: 15px;
+            color: #4cc9f0;
+        }
+
+        .output-values {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .output-value {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        .output-value .label {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+
+        .output-value .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4cc9f0;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            color: #a0a0a0;
+            font-size: 0.9rem;
+            padding: 15px;
+            background: rgba(16, 30, 46, 0.5);
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .bit {
+                width: 22px;
+                height: 30px;
+                font-size: 0.9rem;
+            }
+            
+            .hex {
+                width: 22px;
+                height: 20px;
+                font-size: 0.9rem;
+            }
+            
+            .output-values {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .bits-container {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>二进制可视化工具</h1>
+            <p class="subtitle">输入十进制或十六进制数，查看其32位和64位二进制表示</p>
+        </header>
+
+        <section class="input-section">
+            <div class="input-group">
+                <input type="text" id="numberInput" placeholder="输入十进制或十六进制 (例如: 255, -42, 0xFF)">
+                <button id="convertBtn">转换</button>
+            </div>
+            <div class="examples">
+                示例: <span>255</span> <span>-42</span> <span>0x3F</span> <span>1024</span> <span>0xAB</span>
+            </div>
+        </section>
+
+        <section class="result-section">
+            <div class="bit-display">
+                <h2>32位表示</h2>
+                <div id="bits32" class="bits-container"></div>
+                
+                <div class="output-section">
+                    <h3>32位输出值</h3>
+                    <div class="output-values">
+                        <div class="output-value">
+                            <div class="label">十进制</div>
+                            <div id="decimal32" class="value">0</div>
+                        </div>
+                        <div class="output-value">
+                            <div class="label">十六进制</div>
+                            <div id="hexadecimal32" class="value">0x0</div>
+                        </div>
+                        <div class="output-value">
+                            <div class="label">二进制</div>
+                            <div id="binary32" class="value">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bit-display">
+                <h2>64位表示</h2>
+                <div id="bits64" class="bits-container"></div>
+                
+                <div class="output-section">
+                    <h3>64位输出值</h3>
+                    <div class="output-values">
+                        <div class="output-value">
+                            <div class="label">十进制</div>
+                            <div id="decimal64" class="value">0</div>
+                        </div>
+                        <div class="output-value">
+                            <div class="label">十六进制</div>
+                            <div id="hexadecimal64" class="value">0x0</div>
+                        </div>
+                        <div class="output-value">
+                            <div class="label">二进制</div>
+                            <div id="binary64" class="value">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="footer-note">
+            注意：此工具使用大端序 (Big Endian) 表示法，并采用二进制补码形式表示负数。点击二进制位可以切换0和1。
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const numberInput = document.getElementById('numberInput');
+            const convertBtn = document.getElementById('convertBtn');
+            const bits32Container = document.getElementById('bits32');
+            const bits64Container = document.getElementById('bits64');
+            const decimal32Output = document.getElementById('decimal32');
+            const hexadecimal32Output = document.getElementById('hexadecimal32');
+            const binary32Output = document.getElementById('binary32');
+            const decimal64Output = document.getElementById('decimal64');
+            const hexadecimal64Output = document.getElementById('hexadecimal64');
+            const binary64Output = document.getElementById('binary64');
+
+            // 初始示例
+            updateDisplay(255);
+
+            // 转换按钮点击事件
+            convertBtn.addEventListener('click', function() {
+                convertAndDisplay();
+            });
+
+            // 输入框回车事件
+            numberInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    convertAndDisplay();
+                }
+            });
+
+            function convertAndDisplay() {
+                const input = numberInput.value.trim();
+                if (!input) return;
+
+                let number;
+                
+                // 检查是否为十六进制
+                if (input.startsWith('0x') || input.startsWith('0X')) {
+                    number = parseInt(input, 16);
+                } else {
+                    number = parseInt(input, 10);
+                }
+
+                if (isNaN(number)) {
+                    alert('请输入有效的十进制或十六进制数字！');
+                    return;
+                }
+
+                updateDisplay(number);
+            }
+
+            function updateDisplay(number) {
+                displayBits(number, 32, bits32Container, decimal32Output, hexadecimal32Output, binary32Output);
+                displayBits(number, 64, bits64Container, decimal64Output, hexadecimal64Output, binary64Output);
+            }
+
+            function displayBits(number, bits, bitsContainer, decimalOutput, hexOutput, binaryOutput) {
+                // 清空容器
+                bitsContainer.innerHTML = '';
+
+                // 获取二进制字符串
+                let binaryStr;
+                if (bits === 32) {
+                    // 使用32位视图
+                    const view = new DataView(new ArrayBuffer(4));
+                    view.setInt32(0, number, false); // 大端序
+                    let hexStr = '';
+                    for (let i = 0; i < 4; i++) {
+                        const byte = view.getUint8(i);
+                        hexStr += byte.toString(16).padStart(2, '0').toUpperCase();
+                    }
+                    binaryStr = hexStr.split('').map(h => 
+                        parseInt(h, 16).toString(2).padStart(4, '0')
+                    ).join('');
+                } else {
+                    // 使用64位视图
+                    const view = new DataView(new ArrayBuffer(8));
+                    view.setBigInt64(0, BigInt(number), false); // 大端序
+                    let hexStr = '';
+                    for (let i = 0; i < 8; i++) {
+                        const byte = view.getUint8(i);
+                        hexStr += byte.toString(16).padStart(2, '0').toUpperCase();
+                    }
+                    binaryStr = hexStr.split('').map(h => 
+                        parseInt(h, 16).toString(2).padStart(4, '0')
+                    ).join('');
+                }
+
+                // 显示二进制位和十六进制
+                for (let i = 0; i < binaryStr.length; i += 4) {
+                    const group = binaryStr.substring(i, i + 4);
+                    const hexValue = parseInt(group, 2).toString(16).toUpperCase();
+                    
+                    const groupElement = document.createElement('div');
+                    groupElement.className = 'bit-group';
+                    
+                    // 二进制位行
+                    const bitsRow = document.createElement('div');
+                    bitsRow.className = 'bits-row';
+                    
+                    // 为每个位创建可点击元素
+                    for (let j = 0; j < group.length; j++) {
+                        const bit = group[j];
+                        const bitElement = document.createElement('div');
+                        bitElement.className = `bit bit-${bit} editable`;
+                        bitElement.textContent = bit;
+                        bitElement.dataset.globalIndex = i + j;
+                        bitElement.dataset.bitSize = bits;
+                        
+                        // 添加点击事件切换位值
+                        bitElement.addEventListener('click', function() {
+                            toggleBit(this, bits, decimalOutput, hexOutput, binaryOutput);
+                        });
+                        
+                        bitsRow.appendChild(bitElement);
+                    }
+                    
+                    groupElement.appendChild(bitsRow);
+                    
+                    // 十六进制显示
+                    const hexElement = document.createElement('div');
+                    hexElement.className = 'hex';
+                    hexElement.textContent = hexValue;
+                    groupElement.appendChild(hexElement);
+                    
+                    bitsContainer.appendChild(groupElement);
+                }
+
+                // 更新输出值
+                updateOutputValues(binaryStr, bits, decimalOutput, hexOutput, binaryOutput);
+            }
+
+            function toggleBit(bitElement, bitSize, decimalOutput, hexOutput, binaryOutput) {
+                // 切换位值
+                const currentBit = bitElement.textContent;
+                const newBit = currentBit === '0' ? '1' : '0';
+                const globalIndex = parseInt(bitElement.dataset.globalIndex);
+                
+                bitElement.textContent = newBit;
+                bitElement.className = `bit bit-${newBit} editable`;
+                
+                // 获取所有位值
+                const bitsContainer = bitElement.closest('.bits-container');
+                const bitGroups = bitsContainer.querySelectorAll('.bit-group');
+                
+                let binaryStr = '';
+                bitGroups.forEach(group => {
+                    const bits = group.querySelectorAll('.bit');
+                    bits.forEach(bit => {
+                        binaryStr += bit.textContent;
+                    });
+                });
+                
+                // 更新所有相关的十六进制显示
+                updateHexDisplay(bitsContainer, binaryStr);
+                
+                // 更新输出值
+                updateOutputValues(binaryStr, bitSize, decimalOutput, hexOutput, binaryOutput);
+                
+                // 同时更新另一个位长的显示（保持同步）
+                if (bitSize === 32) {
+                    updateOtherDisplay(binaryStr, 64, decimal64Output, hexadecimal64Output, binary64Output);
+                } else {
+                    updateOtherDisplay(binaryStr, 32, decimal32Output, hexadecimal32Output, binary32Output);
+                }
+            }
+
+            function updateHexDisplay(bitsContainer, binaryStr) {
+                const bitGroups = bitsContainer.querySelectorAll('.bit-group');
+                
+                bitGroups.forEach((group, groupIndex) => {
+                    const startIndex = groupIndex * 4;
+                    const groupBits = binaryStr.substring(startIndex, startIndex + 4);
+                    const hexValue = parseInt(groupBits, 2).toString(16).toUpperCase();
+                    
+                    const hexElement = group.querySelector('.hex');
+                    hexElement.textContent = hexValue;
+                });
+            }
+
+            function updateOutputValues(binaryStr, bitSize, decimalOutput, hexOutput, binaryOutput) {
+                // 将二进制字符串转换为数字
+                let value;
+                if (bitSize === 32) {
+                    // 32位有符号整数
+                    if (binaryStr[0] === '1') {
+                        // 负数，使用补码
+                        value = parseInt(binaryStr, 2) - Math.pow(2, 32);
+                    } else {
+                        // 正数
+                        value = parseInt(binaryStr, 2);
+                    }
+                } else {
+                    // 64位有符号整数
+                    if (binaryStr[0] === '1') {
+                        // 负数，使用补码
+                        value = BigInt('0b' + binaryStr) - (BigInt(1) << BigInt(64));
+                    } else {
+                        // 正数
+                        value = BigInt('0b' + binaryStr);
+                    }
+                }
+                
+                // 更新显示
+                decimalOutput.textContent = value.toString();
+                
+                // 转换为十六进制
+                let hexValue;
+                if (bitSize === 32) {
+                    hexValue = '0x' + (value >>> 0).toString(16).toUpperCase();
+                } else {
+                    // 对于64位，需要特殊处理
+                    let hexStr = value.toString(16).toUpperCase();
+                    if (value < 0) {
+                        // 负数的十六进制表示
+                        hexStr = value.toString(16).toUpperCase().substring(1);
+                        hexValue = '0x' + hexStr.padStart(16, 'F');
+                    } else {
+                        hexValue = '0x' + hexStr.padStart(16, '0');
+                    }
+                }
+                hexOutput.textContent = hexValue;
+                
+                // 更新二进制显示
+                binaryOutput.textContent = '0b' + binaryStr;
+            }
+
+            function updateOtherDisplay(binaryStr, targetBitSize, decimalOutput, hexOutput, binaryOutput) {
+                // 将当前二进制扩展到目标位数或截断
+                let targetBinaryStr;
+                if (binaryStr.length > targetBitSize) {
+                    // 截断到目标位数
+                    targetBinaryStr = binaryStr.substring(binaryStr.length - targetBitSize);
+                } else {
+                    // 扩展到目标位数（符号扩展）
+                    const signBit = binaryStr[0];
+                    targetBinaryStr = binaryStr.padStart(targetBitSize, signBit);
+                }
+                
+                // 更新输出值
+                updateOutputValues(targetBinaryStr, targetBitSize, decimalOutput, hexOutput, binaryOutput);
+            }
+        });
+    </script>
+</body>
+</html>
